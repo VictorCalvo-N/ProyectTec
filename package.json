@@ -1,0 +1,20 @@
+{
+  "name": "download-portal",
+  "version": "1.0.0",
+  "description": "tesis tecsup",
+  "main": "app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "ejs": "3.1.10",
+    "express": "4.19.2",
+    "express-session": "^1.18.0",
+    "mysql2": "^3.10.3",
+    "nodemon": "^3.1.4"
+  },
+  "type": "module"
+}

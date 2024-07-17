@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contenidos</title>
+</head>
+<body>
+  <h1>Contenidos</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Autor</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% contents.forEach(content => { %>
+        <tr>
+          <td><%= content.id %></td>
+          <td><%= content.nombre %></td>
+          <td><%= content.autor %></td>
+          <td><%= content.descripcion %></td>
+          <td><%= content.precio %></td>
+          <td>
+            <form action="/contents/delete/<%= content.id %>" method="POST">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</body>
+</html>

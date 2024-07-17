@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Usuarios</title>
+</head>
+<body>
+  <h1>Usuarios</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre Completo</th>
+        <th>Login</th>
+        <th>Saldo</th>
+        <th>Tipo de Usuario</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.id %></td>
+          <td><%= user.nombre_completo %></td>
+          <td><%= user.login %></td>
+          <td><%= user.saldo %></td>
+          <td><%= user.tipo_usuario %></td>
+          <td><%= user.estado %></td>
+          <td>
+            <form action="/users/delete/<%= user.id %>" method="POST">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</body>
+</html>

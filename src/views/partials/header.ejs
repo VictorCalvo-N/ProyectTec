@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+  <header>
+    <img src="/images/logo-small.png" alt="Logo" class="logo-small">
+    <nav>
+      <% if (page === 'index') { %>
+        <a href="/login">Iniciar Sesión</a>
+        <a href="/register">Registrarse</a>
+      <% } else if (page === 'login') { %>
+        <a href="/">Inicio</a>
+        <a href="/register">Registrarse</a>
+      <% } else if (page === 'register') { %>
+        <a href="/">Inicio</a>
+        <a href="/login">Iniciar Sesión</a>
+      <% } else if (loggedIn) { %>
+        <a href="/logout">Salir</a>
+      <% } %>
+    </nav>
+  </header>
+  <main>

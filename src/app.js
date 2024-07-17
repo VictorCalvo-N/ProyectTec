@@ -1,9 +1,10 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from 'url';
-import session from "express-session"; // Importar express-session
+import session from "express-session";
 
 import userRoutes from "./routes/users.js";
+import adminRoutes from "./routes/admin.js";
 import contentRoutes from "./routes/contents.js";
 import bodyParser from "body-parser";
 
@@ -17,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configurar middleware de sesión
 app.use(session({
-  secret: 'mySecretKey', // Cambia esto a una clave secreta segura
+  secret: 'mySecretKey',
   resave: false,
   saveUninitialized: true
 }));
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/users", userRoutes);
+app.use("/admin", adminRoutes);
 app.use("/contents", contentRoutes);
 
 app.get("/", (req, res) => {

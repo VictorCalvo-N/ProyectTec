@@ -14,20 +14,16 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  const { nombre_completo, login, password } = req.body;
+  const { nombre_completo, login, password, tipo_usuario } = req.body;
   try {
-    // Comprobar si el nombre de usuario ya existe
     const [existingUser] = await pool.query("SELECT * FROM usuarios WHERE login = ?", [login]);
     if (existingUser.length > 0) {
-      // Si el usuario ya existe, renderizar la vista de registro con un mensaje de error
       return res.render("register", { error: "El nombre de usuario ya está en uso", page: 'register', loggedIn: false });
     }
-    
-    // Si el usuario no existe, insertar el nuevo usuario
-    await pool.query("INSERT INTO usuarios (nombre_completo, login, password) VALUES (?, ?, ?)", [nombre_completo, login, password]);
+    await pool.query("INSERT INTO usuarios (nombre_completo, login, password, tipo_usuario) VALUES (?, ?, ?, ?)", [nombre_completo, login, password, tipo_usuario]);
     res.redirect("/users");
   } catch (error) {
-    console.log("Error during registration: ", error); // Agregar más detalles del error
+    console.log("Error during registration: ", error);
     res.status(500).send("Error registering user");
   }
 });
@@ -37,19 +33,26 @@ router.post("/login", async (req, res) => {
   try {
     const [result] = await pool.query("SELECT * FROM usuarios WHERE login = ? AND password = ?", [login, password]);
     if (result.length > 0) {
-      req.session.loggedIn = true; // Establecer el estado de sesión como logueado
-      res.redirect("/contents");
+      req.session.loggedIn = true;
+      req.session.tipo_usuario = result[0].tipo_usuario;
+      if (req.session.tipo_usuario === 'admin') {
+        res.redirect("/admin/confirmar_pedidos");
+      } else {
+        res.redirect("/cliente/dashboard");
+      }
     } else {
       res.render("login", { error: "Usuario o contraseña incorrectos", page: 'login', loggedIn: false });
     }
   } catch (error) {
-    console.log("Error during login: ", error); // Agregar más detalles del error
+    console.log("Error during login: ", error);
     res.status(500).send("Error logging in user");
   }
 });
 
-router.post("/logout", (req, res) => {
-  req.session.loggedIn = false; // Simulación de cierre de sesión
+// Ruta GET para cerrar sesión
+router.get("/logout", (req, res) => {
+  req.session.loggedIn = false;
+  req.session.tipo_usuario = null;
   res.redirect("/");
 });
 

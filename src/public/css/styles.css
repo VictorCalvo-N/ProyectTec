@@ -318,3 +318,50 @@ footer {
   padding: 10px 20px;
   margin-left: 20px;
 }
+
+.saldo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.user-info, .saldo-form {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.imagen-container {
+  flex: 1;
+}
+
+.imagen-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+.saldo-form .form-group {
+  margin-bottom: 20px;
+}
+
+.saldo-form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.saldo-form input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.saldo-form button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.saldo-form button:hover {
+  background-color: #0056b3;
+}

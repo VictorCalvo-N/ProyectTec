@@ -1,9 +1,21 @@
 <%- include('../partials/cliente_header', { title: 'Agregar Saldo', loggedIn: loggedIn }) %>
-  <h1>Agregar Saldo</h1>
-  <!-- Formulario o contenido específico para agregar saldo -->
-
+<main>
+  <div class="saldo-container">
+    <div class="user-info">
+      <h2>Nombre de usuario</h2>
+      <p><%= usuario.nombre_completo %></p>
+      <p>Tu saldo actual: <%= usuario.saldo %></p>
+    </div>
+    <form class="saldo-form" action="/cliente/solicitar_saldo" method="post">
+      <div class="form-group">
+        <label for="saldo">Cuanto deseas agregar:</label>
+        <input type="number" id="saldo" name="saldo_solicitado" min="0" required>
+      </div>
+      <button type="submit">Solicitar saldo</button>
+    </form>
+    <div class="imagen-container">
+      <img src="/images/imagen_agregar_saldo.jpg" alt="Imagen Agregar Saldo">
     </div>
   </div>
-  <%- include('../partials/footer') %>
-</body>
-</html>
+</main>
+<%- include('../partials/footer') %>

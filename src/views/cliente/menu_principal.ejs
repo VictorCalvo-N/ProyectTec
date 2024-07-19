@@ -2,8 +2,7 @@
 <main>
   <div class="menu-principal-container">
     <div class="user-info">
-      <h2>Nombre de usuario</h2>
-      <p><%= usuario.nombre %></p>
+      <h2>Bienvenido, <%= usuario.login %></h2>
       <p>Saldo: <%= usuario.saldo %></p>
     </div>
     <div class="search-section">
@@ -30,7 +29,7 @@
           <p>Nombre: <span><%= contenido.nombre %></span></p>
           <p>Autor: <span><%= contenido.autor %></span></p>
           <p>Precio: <span><%= contenido.precio %></span></p>
-          <p>Extensión de archivo: <span><%= contenido.extension %></span></p>
+          <p>Extensión de archivo: <span><%= contenido.tipo_archivo %></span></p>
           <p>Categoría: <span><%= contenido.categoria %></span></p>
           <p>Nota promedio: <span><%= contenido.nota_promedio %></span></p>
           <p>Descripción: <span><%= contenido.descripcion %></span></p>
@@ -44,5 +43,4 @@
     </div>
   </div>
 </main>
-
 <%- include('../partials/footer') %>

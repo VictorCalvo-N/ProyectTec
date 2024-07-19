@@ -13,47 +13,61 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post('/register', async (req, res) => {
   const { nombre_completo, login, password, tipo_usuario } = req.body;
   try {
-    const [existingUser] = await pool.query("SELECT * FROM usuarios WHERE login = ?", [login]);
-    if (existingUser.length > 0) {
-      return res.render("register", { error: "El nombre de usuario ya está en uso", page: 'register', loggedIn: false });
+    const [result] = await pool.query('INSERT INTO usuarios (nombre_completo, login, password, tipo_usuario) VALUES (?, ?, ?, ?)', 
+      [nombre_completo, login, password, tipo_usuario]);
+
+    req.session.userId = result.insertId;
+    req.session.loggedIn = true;
+    req.session.tipo_usuario = tipo_usuario;
+
+    if (tipo_usuario === 'admin') {
+      res.redirect('/admin/confirmar_pedidos');
+    } else {
+      res.redirect('/cliente/menu_principal');
     }
-    await pool.query("INSERT INTO usuarios (nombre_completo, login, password, tipo_usuario) VALUES (?, ?, ?, ?)", [nombre_completo, login, password, tipo_usuario]);
-    res.redirect("/users");
   } catch (error) {
-    console.log("Error during registration: ", error);
-    res.status(500).send("Error registering user");
+    console.error('Error al registrar usuario:', error);
+    res.render('register', { error: 'Error al registrar usuario', page: 'register', loggedIn: false });
   }
 });
 
-router.post("/login", async (req, res) => {
+// Ruta para manejar el inicio de sesión
+router.post('/login', async (req, res) => {
   const { login, password } = req.body;
   try {
-    const [result] = await pool.query("SELECT * FROM usuarios WHERE login = ? AND password = ?", [login, password]);
-    if (result.length > 0) {
+    const [results] = await pool.query('SELECT * FROM usuarios WHERE login = ? AND password = ?', [login, password]);
+
+    if (results.length > 0) {
+      req.session.userId = results[0].id;
       req.session.loggedIn = true;
-      req.session.tipo_usuario = result[0].tipo_usuario;
-      if (req.session.tipo_usuario === 'admin') {
-        res.redirect("/admin/confirmar_pedidos");
+      req.session.tipo_usuario = results[0].tipo_usuario;
+
+      if (results[0].tipo_usuario === 'admin') {
+        res.redirect('/admin/confirmar_pedidos');
       } else {
-        res.redirect("/cliente/dashboard");
+        res.redirect('/cliente/menu_principal');
       }
     } else {
-      res.render("login", { error: "Usuario o contraseña incorrectos", page: 'login', loggedIn: false });
+      res.render('login', { error: 'Usuario o contraseña incorrectos', page: 'login', loggedIn: false });
     }
   } catch (error) {
-    console.log("Error during login: ", error);
-    res.status(500).send("Error logging in user");
+    console.error('Error al iniciar sesión:', error);
+    res.send('Error al iniciar sesión');
   }
 });
 
-// Ruta GET para cerrar sesión
-router.get("/logout", (req, res) => {
-  req.session.loggedIn = false;
-  req.session.tipo_usuario = null;
-  res.redirect("/");
+
+// Ruta para manejar el cierre de sesión
+router.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error al cerrar sesión:', err);
+    }
+    res.redirect('/login');
+  });
 });
 
 router.post("/delete/:id", async (req, res) => {

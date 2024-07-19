@@ -5,6 +5,7 @@ import session from "express-session";
 
 import userRoutes from "./routes/users.js";
 import adminRoutes from "./routes/admin.js";
+import clienteRoutes from "./routes/cliente.js";
 import contentRoutes from "./routes/contents.js";
 import bodyParser from "body-parser";
 
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
+app.use("/cliente", clienteRoutes);
 app.use("/contents", contentRoutes);
 
 app.get("/", (req, res) => {

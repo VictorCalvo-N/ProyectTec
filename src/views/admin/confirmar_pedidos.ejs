@@ -1,4 +1,49 @@
-<%- include('../partials/admin_header', { title: 'Confirmar Pedidos', loggedIn: loggedIn }) %>
+<%- include('../partials/admin_header', { title: 'Confirmar Pedidos de Saldo', loggedIn: loggedIn }) %>
   <h1>Confirmar Pedidos de Saldo</h1>
-  <!-- Contenido específico de confirmar pedidos -->
+  <div class="confirmar-pedidos-container">
+    <% if (pedidos && pedidos.length > 0) { %>
+      <% pedidos.forEach(pedido => { %>
+        <div class="pedido-detalle">
+          <div class="detalle-item">
+            <h2>Nombre de la persona</h2>
+            <p><%= pedido.nombre_completo %></p>
+          </div>
+          <div class="detalle-item">
+            <h2>Nombre del usuario</h2>
+            <p><%= pedido.login %></p>
+          </div>
+          <div class="detalle-item">
+            <h2>Código del usuario</h2>
+            <p><%= pedido.codigo %></p>
+          </div>
+          
+          <div class="detalle-item">
+            <h2>Saldo del usuario</h2>
+            <p><%= pedido.saldo %></p>
+          </div>
+          <div class="detalle-item">
+            <h2>Saldo solicitado</h2>
+            <p><%= pedido.saldo_solicitado %></p>
+          </div>
+          <div class="acciones">
+            <form action="/admin/aceptar_pedido" method="POST" style="display:inline;">
+              <input type="hidden" name="pedido_id" value="<%= pedido.id %>">
+              <input type="hidden" name="usuario_id" value="<%= pedido.usuario_id %>">
+              <input type="hidden" name="saldo_solicitado" value="<%= pedido.saldo_solicitado %>">
+              <button type="submit">Aceptar</button>
+            </form>
+            <form action="/admin/rechazar_pedido" method="POST" style="display:inline;">
+              <input type="hidden" name="pedido_id" value="<%= pedido.id %>">
+              <button type="submit">Rechazar</button>
+            </form>
+          </div>
+        </div>
+        <% }) %>
+          <% } else { %>
+          <p>No hay pedidos de saldo pendientes.</p>
+      <% } %>
 <%- include('../partials/footer') %>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<%- include('../partials/cliente_header', { title: 'Menu Principal', loggedIn: loggedIn }) %>
+<main>
+  <div class="menu-principal-container">
+    <div class="user-info">
+      <h2>Nombre de usuario</h2>
+      <p><%= usuario.nombre %></p>
+    </div>
+    <div class="search-section">
+      <input type="text" placeholder="Buscar Archivo">
+      <button>Buscar</button>
+      <select>
+        <option value="categoria1">Categoría 1</option>
+        <option value="categoria2">Categoría 2</option>
+      </select>
+    </div>
+    <div class="tabs">
+      <button>Imagen</button>
+      <button>Sonidos</button>
+      <button>Video</button>
+    </div>
+    <div class="content-section">
+      <h2>10 contenidos más descargados</h2>
+      <% contenidos.forEach(contenido => { %>
+      <div class="content-item">
+        <div class="content-thumbnail"></div>
+        <div class="content-details">
+          <p>Nombre: <span><%= contenido.nombre %></span></p>
+          <p>Autor: <span><%= contenido.autor %></span></p>
+          <p>Precio: <span><%= contenido.precio %></span></p>
+          <p>Extensión de archivo: <span><%= contenido.extension %></span></p>
+          <p>Categoría: <span><%= contenido.categoria %></span></p>
+          <p>Nota promedio: <span><%= contenido.nota_promedio %></span></p>
+          <p>Descripción: <span><%= contenido.descripcion %></span></p>
+        </div>
+        <div class="content-actions">
+          <p>Semana pasada: <span>5°</span></p>
+          <button>Elegir</button>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

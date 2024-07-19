@@ -89,14 +89,15 @@ footer {
 }
 
 .cliente-container {
+  max-width: auto; /* Ajusta este valor según sea necesario */
   width: 90%;
-  padding: 20px;
+  margin: auto;
   background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  position: center;
-  z-index: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 .confirmar-pedidos-container {
   display: flex;
   flex-wrap: wrap;
@@ -192,7 +193,7 @@ footer {
   background: rgba(255, 255, 255, 0.8);
   padding: 20px;
   border-radius: 10px;
-  width: 80%;
+  width: auto;
   margin: 20px auto;
 }
 
@@ -270,4 +271,50 @@ footer {
 
 .content-actions button {
   padding: 10px 20px;
+}
+
+.filtros {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.btn-filtrar {
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #007BFF;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.btn-filtrar:hover {
+  background-color: #0056b3;
+}
+
+.contenidos {
+  display: flex;
+  flex-direction: column;
+}
+
+.contenido-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.contenido-item img {
+  max-width: 100px;
+  margin-right: 20px;
+}
+
+.contenido-item div {
+  flex: 1;
+}
+
+.contenido-item button {
+  padding: 10px 20px;
+  margin-left: 20px;
 }

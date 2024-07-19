@@ -4,6 +4,7 @@
     <div class="user-info">
       <h2>Nombre de usuario</h2>
       <p><%= usuario.nombre %></p>
+      <p>Saldo: <%= usuario.saldo %></p>
     </div>
     <div class="search-section">
       <input type="text" placeholder="Buscar Archivo">
@@ -14,15 +15,17 @@
       </select>
     </div>
     <div class="tabs">
-      <button>Imagen</button>
-      <button>Sonidos</button>
-      <button>Video</button>
+      <a href="/cliente/menu_principal/imagenes" class="btn-filtrar">Imagen</a>
+      <a href="/cliente/menu_principal/sonidos" class="btn-filtrar">Sonidos</a>
+      <a href="/cliente/menu_principal/video" class="btn-filtrar">Video</a>
     </div>
     <div class="content-section">
       <h2>10 contenidos más descargados</h2>
       <% contenidos.forEach(contenido => { %>
       <div class="content-item">
-        <div class="content-thumbnail"></div>
+        <div class="content-thumbnail">
+          <img src="<%= contenido.imagen %>" alt="Imagen de contenido">
+        </div>
         <div class="content-details">
           <p>Nombre: <span><%= contenido.nombre %></span></p>
           <p>Autor: <span><%= contenido.autor %></span></p>
@@ -41,4 +44,5 @@
     </div>
   </div>
 </main>
+
 <%- include('../partials/footer') %>

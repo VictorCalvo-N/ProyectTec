@@ -2,19 +2,20 @@
 <main>
   <div class="saldo-container">
     <div class="user-info">
-      <h2>Nombre de usuario</h2>
+      <h2>Nombre comppleto de usuario</h2>
       <p><%= usuario.nombre_completo %></p>
       <p>Tu saldo actual: <%= usuario.saldo %></p>
     </div>
     <form class="saldo-form" action="/cliente/solicitar_saldo" method="post">
-      <div class="form-group">
-        <label for="saldo">Cuanto deseas agregar:</label>
-        <input type="number" id="saldo" name="saldo_solicitado" min="0" required>
+      <input type="hidden" name="usuario_id" value="<%= usuario.id %>">
+      <div>
+        <label for="saldo_solicitado">Cuánto deseas agregar:</label>
+        <input type="number" name="saldo_solicitado" id="saldo_solicitado" min="0" step="0.01" required>
       </div>
       <button type="submit">Solicitar saldo</button>
     </form>
     <div class="imagen-container">
-      <img src="/images/imagen_agregar_saldo.jpg" alt="Imagen Agregar Saldo">
+      <img src="/images/imagen_agregar_saldo.png" alt="Imagen Agregar Saldo">
     </div>
   </div>
 </main>

@@ -1,0 +1,12 @@
+<%- include('../partials/cliente_header', { title: 'Cuenta', loggedIn: loggedIn }) %>
+<main>
+  <div class="cuenta-container">
+    <h2>Información de la Cuenta</h2>
+    <p>Nombre de usuario: <%= usuario.nombre_completo %></p>
+    <p>Correo electrónico: <%= usuario.email %></p>
+    <p>Saldo actual: <%= usuario.saldo %></p>
+    <p>Tipo de cuenta: <%= usuario.tipo_usuario %></p>
+    <!-- Aquí puedes agregar más detalles de la cuenta si es necesario -->
+  </div>
+</main>
+<%- include('../partials/footer') %>

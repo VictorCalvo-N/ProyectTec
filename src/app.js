@@ -35,7 +35,7 @@ app.use((req, res, next) => {
 
 app.use("/users", userRoutes);
 app.use("/admin", adminRoutes);
-app.use("/cliente", clienteRoutes);
+app.use("/cliente", clienteRoutes); // Asegúrate de que esta línea esté presente
 app.use("/contents", contentRoutes);
 
 app.get("/", (req, res) => {

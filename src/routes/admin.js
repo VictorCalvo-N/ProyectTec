@@ -3,11 +3,25 @@ import { pool } from "../database/connectionMySQL.js";
 
 const router = Router();
 
-router.get("/confirmar_pedidos", (req, res) => {
+router.get("/confirmar_pedidos", async (req, res) => {
+  try {
   if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
-    res.render("admin/confirmar_pedidos", { loggedIn: req.session.loggedIn });
+    
+      const [pedidos] = await pool.query(`
+        SELECT ps.id, u.nombre_completo, u.login, u.saldo, ps.saldo_solicitado 
+        FROM pedidos_saldo ps
+        JOIN usuarios u ON ps.usuario_id = u.id
+        WHERE ps.estado = 'pendiente'
+      `)
+      res.render("admin/confirmar_pedidos", { loggedIn: req.session.loggedIn, pedidos 	});
+      
   } else {
+    
     res.redirect("/login");
+  }}
+  catch (error) {
+    console.error('Error al obtener los pedidos de saldo:', error);
+    res.send('Error al obtener los pedidos de saldo');
   }
 });
 
@@ -45,15 +59,20 @@ router.get("/agregar_contenido", (req, res) => {
 
 router.get('/confirmar_pedidos', async (req, res) => {
   try {
-    const [pedidos] = await pool.query(`
-      SELECT ps.id, u.nombre_completo, u.login, u.codigo, u.saldo, ps.saldo_solicitado
+   
+   /* const [pedidos] = await pool.query(`
+      SELECT ps.id, u.nombre_completo, u.login, u.codigo, u.saldo, ps.saldo_solicitado 
       FROM pedidos_saldo ps
       JOIN usuarios u ON ps.usuario_id = u.id
       WHERE ps.estado = 'pendiente'
-    `);
-    res.render('admin/confirmar_pedidos', { loggedIn: req.session.loggedIn, pedidos: pedidos });
+    `);*/
+    const prueba = ["a"];
+    console.log(prueba);
+
+    res.render('admin/confirmar_pedidos', {  
+    loggedIn: req.session.loggedIn, prueba: prueba });
   } catch (error) {
-    console.error(error);
+    console.error('Error al obtener los pedidos de saldo:', error);
     res.send('Error al obtener los pedidos de saldo');
   }
 });

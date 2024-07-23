@@ -1,0 +1,36 @@
+<%- include('../partials/cliente_header', { title: 'Carrito', loggedIn: loggedIn }) %>
+<main>
+  <div class="carrito-container">
+    <h2>Carrito</h2>
+    <ul>
+      <% carrito.forEach(item => { %>
+      <li>
+        <p>Nombre: <%= item.nombre %></p>
+        <p>Precio: <%= item.precio %></p>
+        <form action="/cliente/carrito/quitar" method="post">
+          <input type="hidden" name="id" value="<%= item.id %>">
+          <button type="submit">Quitar</button>
+        </form>
+      </li>
+      <% }) %>
+    </ul>
+
+    
+    <div class="carrito-total">
+        <p>Precio Total: $<%= total %></p>
+        <p>Tu Saldo: $<%= usuario.saldo %></p>
+        <p>Saldo Restante: $<%= usuario.saldo - total %></p>
+    </div>
+    <% if (usuario.saldo < total) { %>
+        <div class="mensaje-error">
+        <p>No tienes suficiente saldo para completar la compra.</p>
+        </div>
+    <% } else { %>
+        <form action="/cliente/carrito/comprar" method="POST">
+        <button type="submit">Comprar</button>
+        </form>
+    <% } %>
+
+  </div>
+</main>
+<%- include('../partials/footer') %>

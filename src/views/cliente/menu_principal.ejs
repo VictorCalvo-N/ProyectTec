@@ -36,7 +36,12 @@
         </div>
         <div class="content-actions">
           <p>Semana pasada: <span>5°</span></p>
-          <button>Elegir</button>
+          <form action="/cliente/carrito/agregar" method="POST">
+            <input type="hidden" name="id" value="<%= contenido.id %>">
+            <input type="hidden" name="nombre" value="<%= contenido.nombre %>">
+            <input type="hidden" name="precio" value="<%= contenido.precio %>">
+            <button type="submit">Elegir</button>
+          </form>
         </div>
       </div>
       <% }); %>

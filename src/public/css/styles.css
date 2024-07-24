@@ -105,14 +105,50 @@ footer {
   padding: 20px;
 }
 
-.pedido-detalle{
-  background: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  width: auto;
-  text-align: start;
+
+.container {
+  display: flex;
+  justify-content: space-between;
 }
+
+.left-panel, .right-panel {
+  width: 47%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pedido-detalle {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.detalle-item {
+  margin-bottom: 10px;
+}
+
+.btn {
+  margin-right: 5px;
+}
+
+.right-panel ul {
+  max-height: 300px;
+  overflow-y: auto;
+  list-style-type: none;
+  padding-left: 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.right-panel li {
+  margin-bottom: 5px;
+}
+
+.bottom-panel {
+  margin-top: 20px;
+}
+
+
 .cola-recarga{
   background: rgba(255, 255, 255, 0.8);
   padding: 20px;
@@ -198,7 +234,7 @@ footer {
 }
 
 .user-info {
-  text-align: left;
+  text-align: center;
   margin-bottom: 20px;
 }
 
@@ -366,4 +402,58 @@ footer {
 
 .saldo-form button:hover {
   background-color: #0056b3;
+}
+
+.cuenta-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.user-info {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.user-info p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.compras-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.compras-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.compra-item {
+  border-bottom: 1px solid #eaeaea;
+  padding: 10px 0;
+}
+
+.compra-item p {
+  margin: 5px 0;
+  color: #666;
+}
+.compra-item ul {
+  max-height: 300px;
+  overflow-y: auto;
+  list-style-type: none;
+  padding-left: 0;
+  padding: 10px;
+  border-radius: 5px;
 }

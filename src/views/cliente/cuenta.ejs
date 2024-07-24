@@ -1,12 +1,25 @@
 <%- include('../partials/cliente_header', { title: 'Cuenta', loggedIn: loggedIn }) %>
 <main>
   <div class="cuenta-container">
-    <h2>Información de la Cuenta</h2>
-    <p>Nombre de usuario: <%= usuario.nombre_completo %></p>
-    <p>Correo electrónico: <%= usuario.email %></p>
-    <p>Saldo actual: <%= usuario.saldo %></p>
-    <p>Tipo de cuenta: <%= usuario.tipo_usuario %></p>
-    <!-- Aquí puedes agregar más detalles de la cuenta si es necesario -->
+    <div class="user-info">
+      <h2>Nombre de usuario</h2>
+      <p><%= usuario.nombre_completo %></p>
+      <p>Saldo: <%= usuario.saldo %></p>
+    </div>
+    <div class="compras-section">
+      <h2>Mis Compras</h2>
+      <% compras.forEach(compra => { %>
+        <div class="compra-item">
+          <ul>
+          <p>Nombre: <%= compra.nombre %></p>
+          <p>Autor: <%= compra.autor %></p>
+          <p>Precio: <%= compra.precio %></p>
+          <p>Extensión de archivo: <%= compra.tipo_archivo %></p>
+          <p>Descripción: <%= compra.descripcion %></p>
+         </ul>
+        </div>
+      <% }); %>
+    </div>
   </div>
 </main>
 <%- include('../partials/footer') %>

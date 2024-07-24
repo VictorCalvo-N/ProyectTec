@@ -1,41 +1,63 @@
 <%- include('../partials/admin_header', { title: 'Confirmar Pedidos de Saldo', loggedIn: loggedIn }) %>
 <main>
   <h1>Confirmar Pedidos de Saldo</h1>
-  <div class="confirmar-pedidos-container">
-    <% if (pedidos && pedidos.length > 0) { %>
-      <% pedidos.forEach(pedido => { %>
+  <div class="container">
+    <div class="left-panel">
+      <% if (pedidoSeleccionado) { %>
         <div class="pedido-detalle">
           <div class="detalle-item">
             <h2>Nombre de la persona</h2>
-            <p><%= pedido.nombre_completo %></p>
+            <p><%= pedidoSeleccionado.nombre_completo %></p>
           </div>
           <div class="detalle-item">
             <h2>Nombre del usuario</h2>
-            <p><%= pedido.login %></p>
+            <p><%= pedidoSeleccionado.login %></p>
           </div>
           <div class="detalle-item">
             <h2>Código del usuario</h2>
-            <p><%= pedido.codigo %></p>
+            <p><%= pedidoSeleccionado.codigo %></p>
           </div>
           <div class="detalle-item">
             <h2>Saldo actual</h2>
-            <p><%= pedido.saldo %></p>
+            <p><%= pedidoSeleccionado.saldo %></p>
           </div>
           <div class="detalle-item">
             <h2>Saldo solicitado</h2>
-            <p><%= pedido.saldo_solicitado %></p>
+            <p><%= pedidoSeleccionado.saldo_solicitado %></p>
           </div>
           <div class="detalle-item">
-            <form action="/admin/confirmar_pedido" method="post">
-              <input type="hidden" name="pedido_id" value="<%= pedido.id %>">
-              <button type="submit">Confirmar</button>
+            <form action="/admin/confirmar_pedidos/aceptar" method="post">
+              <input type="hidden" name="pedido_id" value="<%= pedidoSeleccionado.id %>">
+              <button type="submit" class="btn btn-primary">Aceptar</button>
+            </form>
+            <form action="/admin/confirmar_pedidos/rechazar" method="post">
+              <input type="hidden" name="pedido_id" value="<%= pedidoSeleccionado.id %>">
+              <button type="submit" class="btn btn-danger">Rechazar</button>
             </form>
           </div>
         </div>
-      <% }) %>
-    <% } else { %>
-      <p>No hay pedidos pendientes.</p>
-    <% } %>
+      <% } else { %>
+        <p>Seleccione un usuario de la lista para ver los detalles.</p>
+      <% } %>
+    </div>
+    <div class="right-panel">
+      <h2>Cola de recarga</h2>
+      <ul>
+        <% pedidos.forEach(pedido => { %>
+          <li>
+            <a href="/admin/confirmar_pedidos/<%= pedido.id %>"><%= pedido.nombre_completo %> (<%= pedido.login %>)</a>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+  </div>
+  <div class="bottom-panel">
+    <h2>Últimos contenidos descargados (Sus 12 meses y 10 mejores)</h2>
+    <ul>
+      <li>Item One</li>
+      <li>Item Two</li>
+      <li>Item Three</li>
+    </ul>
   </div>
 </main>
 <%- include('../partials/footer') %>

@@ -32,8 +32,15 @@ router.get('/carrito', async (req, res) => {
 });
 
 // Ruta para agregar un item al carrito
-router.post('/carrito/agregar', (req, res) => {
+router.post('/carrito/agregar', async (req, res) => {
   const { id, nombre, precio } = req.body;
+
+  // Verificar si el usuario ya posee el contenido
+  const [compras] = await pool.query('SELECT * FROM historial_compras WHERE usuario_id = ? AND contenido_id = ?', [req.session.userId, id]);
+  if (compras.length > 0) {
+    return res.send('<script>alert("Ya posee este archivo, revisar Cuenta"); window.location.href = "/cliente/carrito";</script>');
+  }
+
   if (!carrito.some(item => item.id === id)) {
     carrito.push({ id, nombre, precio: parseFloat(precio) });
   }
@@ -63,13 +70,13 @@ router.post('/carrito/comprar', async (req, res) => {
     if (usuario[0].saldo < total) {
       res.redirect('/cliente/carrito');
     } else {
-      await pool.query('UPDATE usuarios SET saldo = saldo - ? WHERE id = ?', [total, req.session.userId]);
-      
-      // Registrar cada item del carrito en historial_descargas
-      for (const item of carrito) {
-        await pool.query('INSERT INTO historial_descargas (usuario_id, contenido_id, fecha_descarga) VALUES (?, ?, NOW())', [req.session.userId, item.id]);
+      // Registrar la compra en historial_compras
+      for (let item of carrito) {
+        await pool.query('INSERT INTO historial_compras (usuario_id, contenido_id) VALUES (?, ?)', [req.session.userId, item.id]);
       }
-      
+
+      // Actualizar el saldo del usuario
+      await pool.query('UPDATE usuarios SET saldo = saldo - ? WHERE id = ?', [total, req.session.userId]);
       carrito = [];
       res.redirect('/cliente/carrito');
     }
@@ -78,7 +85,6 @@ router.post('/carrito/comprar', async (req, res) => {
     res.send('Error al realizar la compra');
   }
 });
-//-----------------------------------------
 
 router.get('/menu_principal', async (req, res) => {
   try {
@@ -149,6 +155,11 @@ router.get('/cuenta', async (req, res) => {
     }
 
     const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.session.userId]);
+    const [compras] = await pool.query(`
+      SELECT c.* FROM historial_compras hc
+      JOIN contenidos c ON hc.contenido_id = c.id
+      WHERE hc.usuario_id = ?
+    `, [req.session.userId]);
 
     if (usuario.length === 0) {
       throw new Error('Usuario no encontrado');
@@ -156,7 +167,8 @@ router.get('/cuenta', async (req, res) => {
 
     res.render('cliente/cuenta', {
       loggedIn: req.session.loggedIn,
-      usuario: usuario[0]
+      usuario: usuario[0],
+      compras: compras
     });
   } catch (error) {
     console.error('Error al obtener datos:', error);

@@ -17,6 +17,7 @@ router.get('/carrito', async (req, res) => {
       throw new Error('Usuario no encontrado');
     }
 
+    const carrito = req.session.carrito || [];
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
 
     res.render('cliente/carrito', {
@@ -32,17 +33,13 @@ router.get('/carrito', async (req, res) => {
 });
 
 // Ruta para agregar un item al carrito
-router.post('/carrito/agregar', async (req, res) => {
+router.post('/carrito/agregar', (req, res) => {
   const { id, nombre, precio } = req.body;
-
-  // Verificar si el usuario ya posee el contenido
-  const [compras] = await pool.query('SELECT * FROM historial_compras WHERE usuario_id = ? AND contenido_id = ?', [req.session.userId, id]);
-  if (compras.length > 0) {
-    return res.send('<script>alert("Ya posee este archivo, revisar Cuenta"); window.location.href = "/cliente/carrito";</script>');
+  if (!req.session.carrito) {
+    req.session.carrito = [];
   }
-
-  if (!carrito.some(item => item.id === id)) {
-    carrito.push({ id, nombre, precio: parseFloat(precio) });
+  if (!req.session.carrito.some(item => item.id === id)) {
+    req.session.carrito.push({ id, nombre, precio: parseFloat(precio) });
   }
   res.redirect('/cliente/carrito');
 });
@@ -50,7 +47,9 @@ router.post('/carrito/agregar', async (req, res) => {
 // Ruta para quitar un item del carrito
 router.post('/carrito/quitar', (req, res) => {
   const { id } = req.body;
-  carrito = carrito.filter(item => item.id !== id);
+  if (req.session.carrito) {
+    req.session.carrito = req.session.carrito.filter(item => item.id !== id);
+  }
   res.redirect('/cliente/carrito');
 });
 
@@ -66,18 +65,17 @@ router.post('/carrito/comprar', async (req, res) => {
       throw new Error('Usuario no encontrado');
     }
 
+    const carrito = req.session.carrito || [];
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+
     if (usuario[0].saldo < total) {
       res.redirect('/cliente/carrito');
     } else {
-      // Registrar la compra en historial_compras
-      for (let item of carrito) {
-        await pool.query('INSERT INTO historial_compras (usuario_id, contenido_id) VALUES (?, ?)', [req.session.userId, item.id]);
-      }
-
-      // Actualizar el saldo del usuario
       await pool.query('UPDATE usuarios SET saldo = saldo - ? WHERE id = ?', [total, req.session.userId]);
-      carrito = [];
+      carrito.forEach(async item => {
+        await pool.query('INSERT INTO historial_compras (usuario_id, contenido_id, fecha_compra) VALUES (?, ?, NOW())', [req.session.userId, item.id]);
+      });
+      req.session.carrito = [];
       res.redirect('/cliente/carrito');
     }
   } catch (error) {
@@ -211,6 +209,81 @@ const obtenerContenidosPorTipo = async (req, res, tipo) => {
     res.send('Error al obtener datos');
   }
 };
+
+// Función para obtener las compras del usuario
+const obtenerComprasUsuario = async (usuarioId) => {
+  const [compras] = await pool.query(`
+    SELECT c.id, c.nombre, c.tipo_archivo, h.fecha_compra
+    FROM historial_compras h
+    JOIN contenidos c ON h.contenido_id = c.id
+    WHERE h.usuario_id = ?
+  `, [usuarioId]);
+  return compras;
+};
+
+// Ruta para mostrar la cuenta del usuario
+router.get("/cuenta", async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.session.userId]);
+
+    if (usuario.length === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const compras = await obtenerComprasUsuario(req.session.userId);
+
+    res.render('cliente/cuenta', {
+      loggedIn: req.session.loggedIn,
+      usuario: usuario[0],
+      compras: compras
+    });
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+    res.send('Error al obtener datos');
+  }
+});
+
+// Ruta para enviar la calificación
+router.post('/calificar', async (req, res) => {
+  const { contenido_id, calificacion } = req.body;
+  try {
+    if (!req.session.userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    // Verificar si el usuario ya ha calificado este contenido
+    const [calificaciones] = await pool.query(`
+      SELECT * FROM calificaciones WHERE usuario_id = ? AND contenido_id = ?
+    `, [req.session.userId, contenido_id]);
+
+    if (calificaciones.length > 0) {
+      return res.send('Ya has calificado este contenido');
+    }
+
+    // Insertar la calificación
+    await pool.query('INSERT INTO calificaciones (usuario_id, contenido_id, nota) VALUES (?, ?, ?)', 
+      [req.session.userId, contenido_id, calificacion]);
+
+    // Calcular la nueva calificación promedio
+    const [result] = await pool.query(`
+      SELECT AVG(nota) AS promedio FROM calificaciones WHERE contenido_id = ?
+    `, [contenido_id]);
+
+    const promedio = result[0].promedio;
+
+    // Actualizar la calificación promedio del contenido
+    await pool.query('UPDATE contenidos SET calificacion_promedio = ? WHERE id = ?', [promedio, contenido_id]);
+
+    res.redirect('/cliente/cuenta');
+  } catch (error) {
+    console.error('Error al calificar el contenido:', error);
+    res.send('Error al calificar el contenido');
+  }
+});
 
 router.get('/menu_principal', (req, res) => obtenerContenidosPorTipo(req, res, 'imagen'));
 router.get('/menu_principal/imagenes', (req, res) => obtenerContenidosPorTipo(req, res, 'imagen'));

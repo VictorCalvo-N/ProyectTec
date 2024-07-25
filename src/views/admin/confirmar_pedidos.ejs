@@ -51,13 +51,16 @@
       </ul>
     </div>
   </div>
-  <div class="bottom-panel">
-    <h2>Últimos contenidos descargados (Sus 12 meses y 10 mejores)</h2>
-    <ul>
-      <li>Item One</li>
-      <li>Item Two</li>
-      <li>Item Three</li>
-    </ul>
+<div class="productos-mas-comprados">
+  <h2>Últimos contenidos descargados (Sus 6 meses y 20 mejores)</h2>
+  <div class="productos-lista">
+    <% productosMasComprados.forEach((producto, index) => { %>
+      <div class="producto-item <%= index < 10 ? 'top-10' : '' %>">
+        <p>Producto: <%= producto.contenido_nombre %> (<%= producto.tipo_archivo %>)</p>
+        <p>Comprado por: <%= producto.nombre_completo %> (<%= producto.login %>)</p>
+      </div>
+    <% }) %>
   </div>
+</div>
 </main>
 <%- include('../partials/footer') %>

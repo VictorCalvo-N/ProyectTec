@@ -16,6 +16,14 @@
           <p>Precio: <%= compra.precio %></p>
           <p>Extensión de archivo: <%= compra.tipo_archivo %></p>
           <p>Descripción: <%= compra.descripcion %></p>
+          <p>Fecha de Compra: <%= compra.fecha_compra %></p>
+          <!-- Formulario para calificar -->
+          <form action="/cliente/calificar" method="post">
+            <input type="hidden" name="contenido_id" value="<%= compra.id %>">
+            <label for="calificacion">Calificación (1-10):</label>
+            <input type="number" name="calificacion" min="1" max="10" required>
+            <button type="submit">Enviar Calificación</button>
+          </form>
          </ul>
         </div>
       <% }); %>

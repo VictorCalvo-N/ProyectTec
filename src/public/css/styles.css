@@ -457,3 +457,41 @@ footer {
   padding: 10px;
   border-radius: 5px;
 }
+
+.productos-lista {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.producto-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.producto-item.top-10 {
+  background-color: #d4edda; /* Verde claro */
+}
+
+form {
+  margin-top: 10px;
+}
+
+form label {
+  margin-right: 5px;
+}
+
+form input[type="number"] {
+  width: 50px;
+  text-align: center;
+}
+
+form button {
+  margin-left: 10px;
+}
+
+.mensaje-calificacion {
+  color: green;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

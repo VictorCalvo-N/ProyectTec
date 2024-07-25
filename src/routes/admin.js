@@ -19,7 +19,25 @@ router.get("/confirmar_pedidos", async (req, res) => {
   try {
     if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
       const pedidos = await obtenerPedidosPendientes();
-      res.render("admin/confirmar_pedidos", { loggedIn: req.session.loggedIn, pedidos, pedidoSeleccionado: null });
+
+      // Obtener los 20 productos más comprados en los últimos 6 meses
+      const [productosMasComprados] = await pool.query(`
+        SELECT h.contenido_id, c.nombre AS contenido_nombre, c.tipo_archivo, u.nombre_completo, u.login, COUNT(h.contenido_id) AS total_compras
+        FROM historial_compras h
+        JOIN contenidos c ON h.contenido_id = c.id
+        JOIN usuarios u ON h.usuario_id = u.id
+        WHERE h.fecha_compra >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY h.contenido_id, h.usuario_id
+        ORDER BY total_compras DESC
+        LIMIT 20
+      `);
+
+      res.render("admin/confirmar_pedidos", { 
+        loggedIn: req.session.loggedIn, 
+        pedidos, 
+        pedidoSeleccionado: null,
+        productosMasComprados: productosMasComprados
+      });
     } else {
       res.redirect("/login");
     }
@@ -42,10 +60,23 @@ router.get("/confirmar_pedidos/:id", async (req, res) => {
         WHERE ps.id = ?
       `, [pedidoId]);
 
+      // Obtener los 20 productos más comprados en los últimos 6 meses
+      const [productosMasComprados] = await pool.query(`
+        SELECT h.contenido_id, c.nombre AS contenido_nombre, c.tipo_archivo, u.nombre_completo, u.login, COUNT(h.contenido_id) AS total_compras
+        FROM historial_compras h
+        JOIN contenidos c ON h.contenido_id = c.id
+        JOIN usuarios u ON h.usuario_id = u.id
+        WHERE h.fecha_compra >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY h.contenido_id, h.usuario_id
+        ORDER BY total_compras DESC
+        LIMIT 20
+      `);
+
       res.render("admin/confirmar_pedidos", { 
         loggedIn: req.session.loggedIn, 
         pedidos, 
-        pedidoSeleccionado: pedido[0] || null 
+        pedidoSeleccionado: pedido[0] || null,
+        productosMasComprados: productosMasComprados
       });
     } else {
       res.redirect("/login");

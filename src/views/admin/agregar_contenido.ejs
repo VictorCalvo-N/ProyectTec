@@ -1,0 +1,70 @@
+<%- include('../partials/admin_header', { title: 'Agregar Contenido', loggedIn: loggedIn }) %>
+<main>
+  <div class="contenido-container">
+    <form class="contenido-form" action="/admin/agregar_contenido" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="archivo">Subir archivo:</label>
+        <input type="file" name="archivo" id="archivo" accept="image/*,audio/*,video/*" required onchange="previewFile()">
+      </div>
+      <div class="form-group">
+        <label for="nombre">Nombre del contenido:</label>
+        <input type="text" name="nombre" id="nombre" required>
+      </div>
+      <div class="form-group">
+        <label for="autor">Autor:</label>
+        <input type="text" name="autor" id="autor" required>
+      </div>
+      <div class="form-group">
+        <label for="descripcion">Descripción:</label>
+        <textarea name="descripcion" id="descripcion" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="precio">Precio:</label>
+        <input type="number" name="precio" id="precio" step="0.01" min="0" required>
+      </div>
+      <div class="form-group">
+        <label for="tamano_archivo">Tamaño del archivo (bytes):</label>
+        <input type="text" name="tamano_archivo" id="tamano_archivo" readonly>
+      </div>
+      <button type="submit">Agregar contenido</button>
+    </form>
+    <div class="preview-container">
+      <h3>Vista previa del archivo:</h3>
+      <img id="img-preview" style="display: none; max-width: 100%; max-height: 300px;" />
+      <audio id="audio-preview" controls style="display: none; width: 100%;"></audio>
+      <video id="video-preview" controls style="display: none; max-width: 100%; max-height: 300px;"></video>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>
+
+<script>
+  function previewFile() {
+    const file = document.getElementById('archivo').files[0];
+    const imgPreview = document.getElementById('img-preview');
+    const audioPreview = document.getElementById('audio-preview');
+    const videoPreview = document.getElementById('video-preview');
+    const tamanoArchivo = document.getElementById('tamano_archivo');
+
+    if (file) {
+      const fileType = file.type;
+      const fileURL = URL.createObjectURL(file);
+      tamanoArchivo.value = file.size;
+
+      imgPreview.style.display = 'none';
+      audioPreview.style.display = 'none';
+      videoPreview.style.display = 'none';
+
+      if (fileType.startsWith('image/')) {
+        imgPreview.src = fileURL;
+        imgPreview.style.display = 'block';
+      } else if (fileType.startsWith('audio/')) {
+        audioPreview.src = fileURL;
+        audioPreview.style.display = 'block';
+      } else if (fileType.startsWith('video/')) {
+        videoPreview.src = fileURL;
+        videoPreview.style.display = 'block';
+      }
+    }
+  }
+</script>

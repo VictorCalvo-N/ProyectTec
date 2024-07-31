@@ -3,7 +3,7 @@ import { pool } from "../database/connectionMySQL.js";
 
 const router = Router();
 
-let carrito = []; // Array temporal para almacenar los items del carrito
+let carritos = []; // Array temporal para almacenar los items del carrito
 
 // Ruta para mostrar el carrito
 router.get('/carrito', async (req, res) => {
@@ -17,7 +17,7 @@ router.get('/carrito', async (req, res) => {
       throw new Error('Usuario no encontrado');
     }
 
-    const carrito = req.session.carrito || [];
+    const carrito = carritos[req.session.userId] || [];
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
 
     res.render('cliente/carrito', {
@@ -33,23 +33,37 @@ router.get('/carrito', async (req, res) => {
 });
 
 // Ruta para agregar un item al carrito
-router.post('/carrito/agregar', (req, res) => {
+router.post('/carrito/agregar', async (req, res) => {
   const { id, nombre, precio } = req.body;
-  if (!req.session.carrito) {
-    req.session.carrito = [];
+  const userId = req.session.userId;
+
+  if (!carritos[userId]) {
+    carritos[userId] = [];
   }
-  if (!req.session.carrito.some(item => item.id === id)) {
-    req.session.carrito.push({ id, nombre, precio: parseFloat(precio) });
+
+  // Verificar si el producto ya fue comprado por el usuario
+  const [existing] = await pool.query('SELECT * FROM historial_compras WHERE usuario_id = ? AND contenido_id = ?', [userId, id]);
+
+  if (existing.length === 0) {
+    if (!carritos[userId].some(item => item.id === id)) {
+      carritos[userId].push({ id, nombre, precio: parseFloat(precio) });
+    }
+    res.redirect('/cliente/carrito');
+  } else {
+    // Redirigir al carrito con un mensaje de que ya posee este archivo
+    res.redirect('/cliente/carrito?error=ya_posee');
   }
-  res.redirect('/cliente/carrito');
 });
 
 // Ruta para quitar un item del carrito
 router.post('/carrito/quitar', (req, res) => {
   const { id } = req.body;
-  if (req.session.carrito) {
-    req.session.carrito = req.session.carrito.filter(item => item.id !== id);
+  const userId = req.session.userId;
+
+  if (carritos[userId]) {
+    carritos[userId] = carritos[userId].filter(item => item.id !== id);
   }
+
   res.redirect('/cliente/carrito');
 });
 
@@ -65,17 +79,24 @@ router.post('/carrito/comprar', async (req, res) => {
       throw new Error('Usuario no encontrado');
     }
 
-    const carrito = req.session.carrito || [];
+    const carrito = carritos[req.session.userId] || [];
     const total = carrito.reduce((sum, item) => sum + item.precio, 0);
 
     if (usuario[0].saldo < total) {
       res.redirect('/cliente/carrito');
     } else {
       await pool.query('UPDATE usuarios SET saldo = saldo - ? WHERE id = ?', [total, req.session.userId]);
-      carrito.forEach(async item => {
-        await pool.query('INSERT INTO historial_compras (usuario_id, contenido_id, fecha_compra) VALUES (?, ?, NOW())', [req.session.userId, item.id]);
-      });
-      req.session.carrito = [];
+
+      for (const item of carrito) {
+        // Verificar si ya existe un historial de compra para este usuario y contenido
+        const [existing] = await pool.query('SELECT * FROM historial_compras WHERE usuario_id = ? AND contenido_id = ?', [req.session.userId, item.id]);
+
+        if (existing.length === 0) {
+          await pool.query('INSERT INTO historial_compras (usuario_id, contenido_id, fecha_compra) VALUES (?, ?, NOW())', [req.session.userId, item.id]);
+        }
+      }
+
+      carritos[req.session.userId] = [];
       res.redirect('/cliente/carrito');
     }
   } catch (error) {
@@ -84,6 +105,7 @@ router.post('/carrito/comprar', async (req, res) => {
   }
 });
 
+//Rutas para el cliente
 router.get('/menu_principal', async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -153,15 +175,17 @@ router.get('/cuenta', async (req, res) => {
     }
 
     const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.session.userId]);
-    const [compras] = await pool.query(`
-      SELECT c.* FROM historial_compras hc
-      JOIN contenidos c ON hc.contenido_id = c.id
-      WHERE hc.usuario_id = ?
-    `, [req.session.userId]);
-
     if (usuario.length === 0) {
       throw new Error('Usuario no encontrado');
     }
+
+    // Obtener el historial de compras del usuario
+    const [compras] = await pool.query(`
+      SELECT c.*, hc.fecha_compra 
+      FROM contenidos c 
+      JOIN historial_compras hc ON c.id = hc.contenido_id 
+      WHERE hc.usuario_id = ?
+    `, [req.session.userId]);
 
     res.render('cliente/cuenta', {
       loggedIn: req.session.loggedIn,
@@ -193,8 +217,8 @@ const obtenerContenidosPorTipo = async (req, res, tipo) => {
     `;
     const valores = {
       imagen: ['PNG', 'JPG', 'GIF', 'BMP'],
-      sonidos: ['MP3', 'MID', 'WAV'],
-      video: ['WMV', 'AVI', 'MPG', 'MOV']
+      sonidos: ['MP3', 'MID', 'WAV','MPEG'],
+      video: ['WMV', 'AVI', 'MPG', 'MOV', 'MP4']
     }[tipo];
 
     const [contenidos] = await pool.query(query, [valores]);

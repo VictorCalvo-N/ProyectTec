@@ -8,9 +8,9 @@
     </div>
     <form class="saldo-form" action="/cliente/solicitar_saldo" method="post">
       <input type="hidden" name="usuario_id" value="<%= usuario.id %>">
-      <div>
+      <div >
         <label for="saldo_solicitado">Cuánto deseas agregar:</label>
-        <input type="number" name="saldo_solicitado" id="saldo_solicitado" min="0" step="0.01" required>
+        <input type="number" name="saldo_solicitado" id="saldo_solicitado" class="form-control" min="0" step="0.01" required>
       </div>
       <button type="submit">Solicitar saldo</button>
     </form>

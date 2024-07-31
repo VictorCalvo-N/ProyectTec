@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { pool } from "../database/connectionMySQL.js";
+import multer from 'multer';
+import path from 'path';
 
 const router = Router();
 
@@ -149,11 +151,62 @@ router.get("/ver_contenido", (req, res) => {
   }
 });
 
+
+// Configuración de multer para guardar archivos
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "src/public/uploads");
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+const obtenerCategoriaId = (tipoArchivo) => {
+  const extensionesImagenes = ['PNG', 'JPG', 'GIF', 'BMP'];
+  const extensionesSonidos = ['MP3', 'MID', 'WAV','MPEG'];
+  const extensionesVideos = ['WMV', 'AVI', 'MPG', 'MOV', 'MP4'];
+
+  if (extensionesImagenes.includes(tipoArchivo)) {
+    return 1;
+  } else if (extensionesSonidos.includes(tipoArchivo)) {
+    return 2;
+  } else if (extensionesVideos.includes(tipoArchivo)) {
+    return 3;
+  } else {
+    return null;
+  }
+};
+
 router.get("/agregar_contenido", (req, res) => {
   if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
     res.render("admin/agregar_contenido", { loggedIn: req.session.loggedIn });
   } else {
     res.redirect("/login");
+  }
+});
+
+router.post("/agregar_contenido", upload.single('archivo'), async (req, res) => {
+  try {
+    const { nombre, autor, descripcion, precio } = req.body;
+    const tipoArchivo = path.extname(req.file.originalname).toUpperCase().replace('.', '');
+    const categoriaId = obtenerCategoriaId(tipoArchivo);
+    const tamanoArchivo = req.file.size;
+    const archivo = req.file.filename;
+
+    if (!categoriaId) {
+      throw new Error("Tipo de archivo no soportado");
+    }
+
+    await pool.query('INSERT INTO contenidos (nombre, autor, descripcion, precio, categoria_id, tipo_archivo, tamano_archivo, archivo, descargas, calificacion_promedio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)', [nombre, autor, descripcion, precio, categoriaId, tipoArchivo, tamanoArchivo, archivo]);
+
+    res.redirect("/admin/agregar_contenido");
+  } catch (error) {
+    console.error('Error al agregar contenido:', error);
+    res.send('Error al agregar contenido');
   }
 });
 

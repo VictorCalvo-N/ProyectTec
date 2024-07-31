@@ -1,0 +1,44 @@
+<%- include('../partials/admin_header', { title: 'Ver Contenido', loggedIn: loggedIn }) %>
+<main>
+  <div class="menu-principal-container">
+    <div class="user-info">
+      <h2>Bienvenido, <%= usuario.login %></h2>
+    </div>
+    <div class="search-section">
+      <input type="text" placeholder="Buscar Archivo">
+      <button>Buscar</button>
+    </div>
+    <div class="tabs">
+      <a href="/admin/ver_contenido/imagenes" class="btn-filtrar">Imagen</a>
+      <a href="/admin/ver_contenido/sonidos" class="btn-filtrar">Sonidos</a>
+      <a href="/admin/ver_contenido/video" class="btn-filtrar">Video</a>
+    </div>
+    <div class="content-section">
+      <h2>10 contenidos más descargados</h2>
+      <% contenidos.forEach(contenido => { %>
+      <div class="content-item">
+        <div class="content-thumbnail">
+          <img src="<%= contenido.imagen %>" alt="Imagen de contenido">
+        </div>
+        <div class="content-details">
+          <p>Nombre: <span><%= contenido.nombre %></span></p>
+          <p>Autor: <span><%= contenido.autor %></span></p>
+          <p>Precio: <span><%= contenido.precio %></span></p>
+          <p>Extensión de archivo: <span><%= contenido.tipo_archivo %></span></p>
+          <p>Categoría: <span><%= contenido.categoria %></span></p>
+          <p>Nota promedio: <span><%= contenido.nota_promedio %></span></p>
+          <p>Descripción: <span><%= contenido.descripcion %></span></p>
+        </div>
+        <div class="content-actions">
+          <p>Semana pasada: <span>5°</span></p>
+          <form action="/admin/eliminar_contenido" method="POST">
+            <input type="hidden" name="id" value="<%= contenido.id %>">
+            <button type="submit">Eliminar</button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/footer') %>

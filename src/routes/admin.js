@@ -127,11 +127,25 @@ router.post('/confirmar_pedidos/rechazar', async (req, res) => {
   }
 });
 
-router.get("/eliminar_contenido", (req, res) => {
-  if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
-    res.render("admin/eliminar_contenido", { loggedIn: req.session.loggedIn });
-  } else {
-    res.redirect("/login");
+// Ruta para eliminar un contenido
+router.post("/eliminar_contenido", async (req, res) => {
+  const { id } = req.body;
+  try {
+    if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
+      // Eliminar las calificaciones relacionadas
+      await pool.query('DELETE FROM calificaciones WHERE contenido_id = ?', [id]);
+      // Eliminar las compras relacionadas
+      await pool.query('DELETE FROM historial_compras WHERE contenido_id = ?', [id]);
+      // Eliminar el contenido de la base de datos
+      await pool.query('DELETE FROM contenidos WHERE id = ?', [id]);
+      // Redirigir de nuevo a la vista de contenidos
+      res.redirect("/admin/ver_contenido");
+    } else {
+      res.redirect("/login");
+    }
+  } catch (error) {
+    console.error('Error al eliminar el contenido:', error);
+    res.send('Error al eliminar el contenido');
   }
 });
 
@@ -143,13 +157,6 @@ router.get("/clientes", (req, res) => {
   }
 });
 
-router.get("/ver_contenido", (req, res) => {
-  if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
-    res.render("admin/ver_contenido", { loggedIn: req.session.loggedIn });
-  } else {
-    res.redirect("/login");
-  }
-});
 
 
 // Configuración de multer para guardar archivos
@@ -209,5 +216,71 @@ router.post("/agregar_contenido", upload.single('archivo'), async (req, res) => 
     res.send('Error al agregar contenido');
   }
 });
+
+router.get('/ver_contenido', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.session.userId]);
+
+    if (usuario.length === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const [contenidos] = await pool.query('SELECT * FROM contenidos ORDER BY descargas DESC LIMIT 10');
+
+    res.render('admin/ver_contenido', {
+      loggedIn: req.session.loggedIn,
+      usuario: usuario[0],
+      contenidos: contenidos
+    });
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+    res.send('Error al obtener datos');
+  }
+});
+
+const obtenerContenidosPorTipo = async (req, res, tipo) => {
+  try {
+    if (!req.session.userId) {
+      throw new Error('Usuario no autenticado');
+    }
+
+    const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [req.session.userId]);
+
+    if (usuario.length === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const query = `
+      SELECT * FROM contenidos
+      WHERE tipo_archivo IN (?)
+      ORDER BY descargas DESC LIMIT 10
+    `;
+    const valores = {
+      imagen: ['PNG', 'JPG', 'GIF', 'BMP'],
+      sonidos: ['MP3', 'MID', 'WAV','MPEG'],
+      video: ['WMV', 'AVI', 'MPG', 'MOV', 'MP4']
+    }[tipo];
+
+    const [contenidos] = await pool.query(query, [valores]);
+
+    res.render('admin/ver_contenido', {
+      loggedIn: req.session.loggedIn,
+      usuario: usuario[0],
+      contenidos: contenidos
+    });
+  } catch (error) {
+    console.error('Error al obtener datos:', error);
+    res.send('Error al obtener datos');
+  }
+};
+
+router.get('/ver_contenido', (req, res) => obtenerContenidosPorTipo(req, res, 'imagen'));
+router.get('/ver_contenido/imagenes', (req, res) => obtenerContenidosPorTipo(req, res, 'imagen'));
+router.get('/ver_contenido/sonidos', (req, res) => obtenerContenidosPorTipo(req, res, 'sonidos'));
+router.get('/ver_contenido/video', (req, res) => obtenerContenidosPorTipo(req, res, 'video'));
 
 export default router;

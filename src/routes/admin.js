@@ -149,15 +149,69 @@ router.post("/eliminar_contenido", async (req, res) => {
   }
 });
 
-router.get("/clientes", (req, res) => {
-  if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
-    res.render("admin/clientes", { loggedIn: req.session.loggedIn });
-  } else {
-    res.redirect("/login");
+// Ruta para mostrar la página de clientes
+router.get("/clientes", async (req, res) => {
+  try {
+    if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
+      const [topClientes] = await pool.query('SELECT * FROM top_10_clientes_compras');
+      const [topProductos] = await pool.query('SELECT * FROM top_10_productos_calificados');
+      const [exClientes] = await pool.query('SELECT * FROM exclientes');
+      const [usuarios] = await pool.query('SELECT * FROM usuarios WHERE estado = "activo"');
+
+      res.render("admin/clientes", {
+        loggedIn: req.session.loggedIn,
+        topClientes: topClientes,
+        topProductos: topProductos,
+        exClientes: exClientes,
+        usuarios: usuarios
+      });
+    } else {
+      res.redirect("/login");
+    }
+  } catch (error) {
+    console.error('Error al obtener datos de clientes:', error);
+    res.send('Error al obtener datos de clientes');
   }
 });
 
+// Ruta para buscar usuarios
+router.post("/clientes/buscar", async (req, res) => {
+  const { query } = req.body;
+  try {
+    if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
+      const [usuarios] = await pool.query('SELECT * FROM usuarios WHERE estado = "activo" AND (nombre_completo LIKE ? OR login LIKE ?)', [`%${query}%`, `%${query}%`]);
+      res.json({ usuarios });
+    } else {
+      res.status(403).send('No autorizado');
+    }
+  } catch (error) {
+    console.error('Error al buscar usuarios:', error);
+    res.status(500).send('Error al buscar usuarios');
+  }
+});
 
+// Ruta para eliminar usuarios (marcarlos como exclientes)
+router.post("/clientes/eliminar", async (req, res) => {
+  const { usuarioId } = req.body;
+  try {
+    if (req.session.loggedIn && req.session.tipo_usuario === 'admin') {
+      const [usuario] = await pool.query('SELECT * FROM usuarios WHERE id = ?', [usuarioId]);
+      if (usuario.length > 0) {
+        const nombreCompleto = usuario[0].nombre_completo;
+        await pool.query('UPDATE usuarios SET estado = "excliente" WHERE id = ?', [usuarioId]);
+        await pool.query('INSERT INTO exclientes (nombre_completo, fecha_salida) VALUES (?, NOW())', [nombreCompleto]);
+        res.redirect('/admin/clientes');
+      } else {
+        res.status(404).send('Usuario no encontrado');
+      }
+    } else {
+      res.status(403).send('No autorizado');
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).send('Error al eliminar usuario');
+  }
+});
 
 // Configuración de multer para guardar archivos
 const storage = multer.diskStorage({

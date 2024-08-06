@@ -98,6 +98,52 @@ footer {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.clientes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.section {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.lista-clientes, .lista-usuarios, .lista-ex-clientes {
+  list-style: none;
+  padding: 0;
+}
+
+.cliente-item, .usuario-item, .ex-cliente-item {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 0;
+}
+
+.cliente-item:last-child, .usuario-item:last-child, .ex-cliente-item:last-child {
+  border-bottom: none;
+}
+
+form#buscar-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+form#buscar-form input[type="text"] {
+  padding: 5px;
+  width: 200px;
+}
+
+form#buscar-form button {
+  padding: 5px 10px;
+}
+
+
 .confirmar-pedidos-container {
   display: flex;
   flex-wrap: wrap;

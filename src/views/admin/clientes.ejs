@@ -1,4 +1,74 @@
 <%- include('../partials/admin_header', { title: 'Clientes', loggedIn: loggedIn }) %>
-  <h1>Clientes</h1>
-  <!-- Contenido específico de clientes -->
+<script>
+  document.getElementById('buscar-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const query = document.getElementById('buscar-archivo').value;
+    fetch('/admin/clientes/buscar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const listaUsuarios = document.querySelector('.lista-usuarios');
+      listaUsuarios.innerHTML = '';
+      data.usuarios.forEach(usuario => {
+        const usuarioItem = document.createElement('div');
+        usuarioItem.classList.add('usuario-item');
+        usuarioItem.innerHTML = `<p>${usuario.nombre_completo} - ${usuario.login}</p>
+          <form action="/admin/clientes/eliminar" method="post" style="display:inline;">
+            <input type="hidden" name="usuarioId" value="${usuario.id}">
+            <button type="submit">Eliminar</button>
+          </form>`;
+        listaUsuarios.appendChild(usuarioItem);
+      });
+    })
+    .catch(error => console.error('Error al buscar usuarios:', error));
+  });
+</script>
+
+<main>
+  <div class="clientes-container">
+    <section class="top-clientes">
+      <h2>Top clientes con más compras</h2>
+      <div class="lista-clientes">
+        <% topClientes.forEach(cliente => { %>
+          <div class="cliente-item">
+            <p><%= cliente.nombre_completo %> - Compras: <%= cliente.total_compras %></p>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <section class="notas-usuarios">
+      <h2>Usuarios</h2>
+      <form id="buscar-form" action="/admin/clientes/buscar" method="post">
+        <input type="text" name="query" placeholder="Buscar Usuario" id="buscar-archivo">
+        <button type="submit" id="buscar-boton">Buscar</button>
+      </form>
+      <div class="lista-usuarios">
+        <% usuarios.forEach(usuario => { %>
+          <div class="usuario-item">
+            <p><%= usuario.nombre_completo %> - <%= usuario.login %></p>
+            <form action="/admin/clientes/eliminar" method="post" style="display:inline;">
+              <input type="hidden" name="usuarioId" value="<%= usuario.id %>">
+              <button type="submit">Eliminar</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+    <section class="ex-clientes">
+      <h2>Ex Clientes</h2>
+      <div class="lista-ex-clientes">
+        <% exClientes.forEach(exCliente => { %>
+          <div class="ex-cliente-item">
+            <p><%= exCliente.nombre_completo %> - Fecha de salida: <%= exCliente.fecha_salida %></p>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+</main>
 <%- include('../partials/footer') %>
